@@ -6,6 +6,8 @@ import sys
 import matplotlib.pyplot as plt
 from math import pi
 
+dt_format = "%Y-%m-%d"
+
 def read_input(filename):
     data = dict()
 
@@ -25,13 +27,16 @@ def read_input(filename):
 
 def filter(data, st_dt, en_dt):
     result = dict()
+    newest = st_dt
 
     for date in data:
         dt = datetime.datetime.strptime(date, dt_format)
         if st_dt <= dt and en_dt >= dt:
             result[date] = data[date]
+            if newest < dt:
+                newest = dt
 
-    return result
+    return result, newest.strftime(dt_format)
 
 def printData(data):
     print("Key:{0}, Value:{1}".format(date, str(data[date])))
@@ -156,30 +161,30 @@ def calFreq(data, filename):
 
 if __name__ == "__main__":
     args = sys.argv
-    dt_format = "%Y-%m-%d"
     st_dt = datetime.datetime.strptime(args[1], dt_format)
     en_dt = min(datetime.datetime.now(), datetime.datetime.strptime(args[2], dt_format))
-    data = filter(read_input("daily-cash-539.csv"), st_dt, en_dt)
+    data, newest = filter(read_input("daily-cash-539.csv"), st_dt, en_dt)
 
     s = len(data)
+    print(" [*] 期間最新一期日期為：{0}，開獎號碼：{1}".format(newest, data[newest][0:5]))
     print(" [*] 從{0}到{1}，共開出了{2}期.".format(st_dt.strftime(dt_format), en_dt.strftime(dt_format), s))
     print("")
     
     # printData(data, st_dt, en_dt)
     print(" [*] 其中2星出現次數前{0}為".format(args[3]))
-    print(" [-] (出現次數, (第一個數, 第二個數))".format(args[3]))
+    print(" [-] (出現次數, (第一個數, 第二個數))")
     s = cal2Star(data, number=int(args[3]), reverse=True)
     print(" [*] 期間共出現過{0}組2星".format(s))
     print("")
 
     print(" [*] 其中3星出現次數前{0}為".format(args[3]))
-    print(" [-] (出現次數, (第一個數, 第二個數, 第三個數))".format(args[3]))
+    print(" [-] (出現次數, (第一個數, 第二個數, 第三個數))")
     s = cal3Star(data, number=int(args[3]), reverse=True)
     print(" [*] 期間共出現過{0}組3星".format(s)) 
     print("")
 
     print(" [*] 其中4星出現次數前{0}為".format(args[3]))
-    print(" [-] (出現次數, (第一個數, 第二個數, 第三個數, 第四個數))".format(args[3]))
+    print(" [-] (出現次數, (第一個數, 第二個數, 第三個數, 第四個數))")
     s = cal4Star(data, number=int(args[3]), reverse=True)
     print(" [*] 期間共出現過{0}組4星".format(s)) 
     print("")
