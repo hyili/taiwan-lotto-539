@@ -123,8 +123,10 @@ def cal4Star(data, number=5, reverse=True):
     return s
 
 
-def calFreq(data, filename):
+def calFreq(data, filename, number=5, reverse=True):
     result = [0] * 40
+    s = 0
+    ordered_list = list()
     maximum = 0
 
     for date in data:
@@ -133,6 +135,18 @@ def calFreq(data, filename):
 
     for i in range(1, 40, 1):
         maximum = max(maximum, result[i])
+
+    for i in range(1, 40, 1):
+        ordered_list.append((result[i], i))
+
+    def takeFirst(ele):
+        return ele[0]
+
+    ordered_list.sort(key=takeFirst, reverse=reverse)
+    for i in range(0, min(len(ordered_list), number), 1):
+        print(" [-] {0}".format(ordered_list[i]))
+
+
 
     # Part 1
     N = 39
@@ -189,4 +203,7 @@ if __name__ == "__main__":
     print(" [*] 期間共出現過{0}組4星".format(s)) 
     print("")
 
-    calFreq(data, args[4])
+    print(" [*] 其中出現次數前{0}為".format(args[3]))
+    print(" [-] (出現次數, 哪個數字)")
+    calFreq(data, args[4], number=int(args[3]), reverse=True)
+    print("")
