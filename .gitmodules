@@ -1,0 +1,3 @@
+[submodule "rss/jQRangeSlider"]
+	path = rss/jQRangeSlider
+	url = https://github.com/ghusse/jQRangeSlider

@@ -86,10 +86,10 @@ other_link() {
     echo '<td style="background-color:#90EE90;padding:10px;margin-bottom:5px;border-radius:10px;text-align:center;vertical-align:top">'
     echo '<a href="../fantasy5/report.html"> fantasy5加工廠 </a>'
     echo '</th><th>'
-    echo '<td style="background-color:#8600FF;padding:10px;margin-bottom:5px;border-radius:10px;text-align:center;vertical-align:top">'
-    echo '<a href="../539/test.html"> 測試區 </a>'
+    echo '<td style="background-color:#FF6384;padding:10px;margin-bottom:5px;border-radius:10px;text-align:center;vertical-align:top">'
+    echo '<a href="../539/rangeslider.html"> 539新功能測試區 </a>'
     echo '</th><th>'
-    echo '<td style="background-color:#8600FF;padding:10px;margin-bottom:5px;border-radius:10px;text-align:center;vertical-align:top">'
+    echo '<td style="background-color:#36A2EB;padding:10px;margin-bottom:5px;border-radius:10px;text-align:center;vertical-align:top">'
     echo '<a href="../539/formula.html"> 算法 </a>'
     echo '</th></tr>'
     echo '</table>'
@@ -163,3 +163,7 @@ echo '</body>' >> $webpage
 
 
 mv img/* /usr/local/www/nginx/539/img/
+
+
+./transform_json.py 2020-01-01 2022-01-01
+mv data_json/* /usr/local/www/nginx/539/data_json/

@@ -1,0 +1,249 @@
+<!DOCTYPE>
+    <html>
+    <head>
+        <meta charset="utf-8"/>
+        <title>539 Range Slider</title>
+        <link rel="stylesheet" href="rss/jQRangeSlider/css/iThing.css" type="text/css" />
+    </head>
+    <body>
+        <table>
+            <tr>
+                <th>
+                    <td style="background-color:#FFD382;padding:10px;margin-bottom:5px;border-radius:10px;text-align:center;vertical-align:top">
+                        <a href="../539/report.html"> 539加工廠 </a>
+                    </td>
+                </th>
+                <th>
+                    <td style="background-color:#90EE90;padding:10px;margin-bottom:5px;border-radius:10px;text-align:center;vertical-align:top">
+                        <a href="../fantasy5/report.html"> fantasy5加工廠 </a>
+                    </td>
+                </th>
+                <th>
+                    <td style="background-color:#FF6384;padding:10px;margin-bottom:5px;border-radius:10px;text-align:center;vertical-align:top">
+                         539新功能測試區 
+                    </td>
+                </th>
+                <th>
+                    <td style="background-color:#36A2EB;padding:10px;margin-bottom:5px;border-radius:10px;text-align:center;vertical-align:top">
+                        <a href="../539/formula.html"> 算法 </a>
+                    </td>
+                </th>
+            </tr>
+        </table>
+        <table width=100%>
+            <tr>
+                539 - 選擇日期區間(最長一年)
+            </tr>
+            <tr>
+                <td style="background-color:#FFD382;padding:10px;margin-bottom:5px;border-radius:10px;width:50%;vertical-align:top">
+                    <h3 style="color:#FF6384"> 紅色 - 日期區間 </h3>
+                    <div id="slider-up"></div>
+                    <h3 style="color:#36A2EB"> 藍色 - 日期區間 </h3>
+                    <div id="slider-down"></div>
+                    <table>
+                        <td style="background-color:#FFD382;padding:10px;margin-bottom:5px;border-radius:10px;width:20%;vertical-align:top">
+                    <h3 style="color:#FF6384"> 紅色 - 出現次數排名 </h3>
+                            <p id="text-up" style="font-family:monospace;white-space: pre-wrap"></p>
+                        </td>
+                        <td style="background-color:#FFD382;padding:10px;margin-bottom:5px;border-radius:10px;width:20%;vertical-align:top">
+                    <h3 style="color:#36A2EB"> 藍色 - 出現次數排名 </h3>
+                            <p id="text-down" style="font-family:monospace;white-space: pre-wrap"></p>
+                        </td>
+                    </table>
+                </td>
+                <td style="background-color:#90EE90;padding:10px;margin-bottom:5px;border-radius:10px;width:50%;vertical-align:top">
+                    <div id="chart-container" style="position: relative;margin: auto;height:80vh;width:45vw">
+                        <canvas id="mychart"></canvas>
+                    </div>
+                </td>
+            </tr>
+        </table>
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"
+            integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+        <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"
+            integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU=" crossorigin="anonymous"></script>
+
+        <!-- http://ghusse.github.io/jQRangeSlider/documentation.html#quickStart -->
+        <script src="rss/jQRangeSlider/lib/jquery.mousewheel.min.js"></script>
+        <script src="rss/jQRangeSlider/jQRangeSliderMouseTouch.js"></script>
+        <script src="rss/jQRangeSlider/jQRangeSliderDraggable.js"></script>
+        <script src="rss/jQRangeSlider/jQRangeSliderHandle.js"></script>
+        <script src="rss/jQRangeSlider/jQRangeSliderBar.js"></script>
+        <script src="rss/jQRangeSlider/jQRangeSliderLabel.js"></script>
+        <script src="rss/jQRangeSlider/jQRangeSlider.js"></script>
+        <script src="rss/jQRangeSlider/jQDateRangeSliderHandle.js"></script>
+        <script src="rss/jQRangeSlider/jQDateRangeSlider.js"></script>
+        <script src="rss/jQRangeSlider/jQEditRangeSliderLabel.js"></script>
+        <script src="rss/jQRangeSlider/jQEditRangeSlider.js"></script>
+        <script src="rss/jQRangeSlider/jQRuler.js"></script>
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js"></script>
+        <script>
+            var records = {
+                "text-up": {
+                    "init": false,
+                    "data": Array(39),
+                    "color": "rgb(255, 99, 132)",
+                    "tcolor": "rgba(255, 99, 132, 0.2)"
+                },
+                "text-down": {
+                    "init": false,
+                    "data": Array(39),
+                    "color": "rgb(54, 162, 235)",
+                    "tcolor": "rgba(54, 162, 235, 0.2)"
+                }
+            };
+
+            $("#slider-up").dateRangeSlider({
+                range: {
+                    min: false,
+                    max: {days: 365}
+                },
+                bounds: {
+                    min: new Date(2020, 0, 1),
+                    max: new Date()
+                },
+                defaultValues: {
+                    min: new Date(2020, 0, 1),
+                    max: new Date(2020, 11, 31)
+                },
+                step: {
+                    days: 1
+                }
+            });
+
+            $("#slider-down").dateRangeSlider({
+                range: {
+                    min: false,
+                    max: {days: 365}
+                },
+                bounds: {
+                    min: new Date(2020, 0, 1),
+                    max: new Date()
+                },
+                defaultValues: {
+                    min: new Date(2020, 0, 1),
+                    max: new Date(2020, 11, 31)
+                },
+                step: {
+                    days: 1
+                }
+            });
+
+            $("#slider-up").bind("valuesChanged", function(e, data) {
+                console.log("Values just changed. min: " + data.values.min + " max: " + data.values.max);
+                records["text-up"]["start"] = data.values.min;
+                records["text-up"]["end"] = data.values.max;
+                statistics("text-up", records);
+            });
+
+            $("#slider-down").bind("valuesChanged", function(e, data) {
+                console.log("Values just changed. min: " + data.values.min + " max: " + data.values.max);
+                records["text-down"]["start"] = data.values.min;
+                records["text-down"]["end"] = data.values.max;
+                statistics("text-down", records);
+            });
+
+            function statistics(id, records) {
+                var sd = new Date(records[id]["start"]);
+                var ed = new Date(records[id]["end"]);
+
+                records[id]["data"].fill(0);
+                $.getJSON("data_json/2020-01-01_2022-01-01.json", function(data) {
+                    for (key in data) {
+                        var td = new Date(key);
+                        if (td < sd || ed < td) continue;
+                        for (i = 0; i < 5; i++) {
+                            records[id]["data"][parseInt(data[key][i])-1] += 1;
+                        }
+                    }
+
+                    records[id]["init"] = true;
+
+                    genText(records);
+                    genChart(records);
+
+
+                    /* verification */
+                    $.ajax({
+                        url: "rsVerification.html",
+                        method: "GET",
+                        dataType: "json",
+                        data: {
+                            "ID": id,
+                            "SD": records[id]["start"].toISOString(),
+                            "ED": records[id]["end"].toISOString()
+                        },
+
+                        success: function(res){console.log("Ok");},
+                        error: function(res){console.log("Ok");},
+                    });
+                });
+            }
+
+            function genText(records) {
+                for (id in records) {
+                    if (!records[id]["init"]) continue;
+
+                    var data = records[id]["data"];
+                    AoB = data.map(function (v, k) {
+                        return {key: k, val: v};
+                    });
+                    AoB.sort(function (a, b) {
+                        if (a.val < b.val) return 1;
+                        if (a.val > b.val) return -1;
+                        return 0;
+                    })
+
+                    plain = document.getElementById(id);
+                    plain.innerHTML = "";
+
+                    for (i = 0; i < 39; i++) {
+                        plain.innerHTML += (AoB[i].key+1).toString().padStart(3, " ") + " 出現 " + (AoB[i].val).toString().padStart(3, " ") + " 次\n";
+                    }
+                }
+            }
+
+            function genChart(records) {
+                var data = Array();
+                for (id in records) {
+                    if (!records[id]["init"]) continue;
+                    data.push({
+                        backgroundColor: records[id]["tcolor"],
+                        borderColor: records[id]["color"],
+                        pointBackgroundColor: records[id]["color"],
+                        pointBorderColor: "#fff",
+                        pointHoverBackgroundColor: "#fff",
+                        pointHoverBorderColor: records[id]["color"],
+                        fill: true,
+                        label: id,
+                        data: records[id]["data"]
+                    });
+                }
+
+                var ctx = document.getElementById('mychart');
+                var myRadarChart = new Chart(ctx, {
+                    type: 'radar',
+                    data: {
+                        labels: Array.from(Array(39), (e, i) => (i + 1).toString()),
+                        datasets: data
+                    },
+                    options: {
+                        maintainAspectRatio: false,
+                        elements: {
+                            line: {
+                                tension: 0,
+                                borderWidth: 3
+                            }
+                        },
+                        scale: {
+                            ticks: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            }
+        </script>
+    </body>
+</html>
