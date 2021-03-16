@@ -1,0 +1,411 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>539 & fantasy5 - 連碰 & 翻轉算式</title>
+        <script src="https://code.jquery.com/jquery-3.4.1.js"
+                integrity="sha256-WpOohJOqMqqyKL9FccASB9O0KwACQJpFTUBLTYOVvVU=" crossorigin="anonymous"></script>
+        <script>
+            function showHelp(obj) {
+                switch (obj.id) {
+                    case "mul1":
+                        if (obj.value == 0) document.getElementById("help1").innerHTML = "全車計算已停用";
+                        else document.getElementById("help1").innerHTML = "全車計算啟用中";
+                        break;
+                    case "mul2":
+                        if (obj.value == 0) document.getElementById("help2").innerHTML = "二星計算已停用";
+                        else document.getElementById("help2").innerHTML = "二星計算啟用中";
+                        break;
+                    case "mul3":
+                        if (obj.value == 0) document.getElementById("help3").innerHTML = "三星計算已停用";
+                        else document.getElementById("help3").innerHTML = "三星計算啟用中";
+                        break;
+                    case "mul4":
+                        if (obj.value == 0) document.getElementById("help4").innerHTML = "四星計算已停用";
+                        else document.getElementById("help4").innerHTML = "四星計算啟用中";
+                        break;
+                }
+            }
+
+            function showReward(obj) {
+                switch (obj.value) {
+                    case "5":
+                        document.getElementById("RR").value = 1.9;
+                        break;
+                    case "6":
+                        document.getElementById("RR").value = 2.2;
+                        break;
+                    case "7":
+                        document.getElementById("RR").value = 2.58;
+                        break;
+                    case "8":
+                        document.getElementById("RR").value = 3;
+                        break;
+                    case "9":
+                        document.getElementById("RR").value = 3.6;
+                        break;
+                    case "10":
+                        document.getElementById("RR").value = 4.2;
+                        break;
+                    case "11":
+                        document.getElementById("RR").value = 5.05;
+                        break;
+                    case "12":
+                        document.getElementById("RR").value = 6.1;
+                        break;
+                    default:
+                        document.getElementById("RR").value = 1;
+                        break;
+                }
+            }
+
+            function combination(target, base) {
+                var a = 1, b = 1;
+
+                for (i = 0; i < target; i++) {
+                    a *= base - i;
+                    b *= i + 1;
+                }
+
+                return a / b; 
+            }
+
+            function calculate(theForm) {
+                var result = "";
+
+                var hide = theForm.hide.checked;
+                var num = parseInt(theForm.num.value);
+                var mul = parseFloat(theForm.mul.value);
+                var mul1 = parseFloat(theForm.mul1.value);
+                var mul2 = parseFloat(theForm.mul2.value);
+                var mul3 = parseFloat(theForm.mul3.value);
+                var mul4 = parseFloat(theForm.mul4.value);
+                var S1C = parseInt(theForm.S1C.value), PZ1 = parseInt(theForm.PZ1.value);
+                var S2C = parseInt(theForm.S2C.value), S3C = parseInt(theForm.S3C.value), S4C = parseInt(theForm.S4C.value);
+                var PZ2 = parseInt(theForm.PZ2.value), PZ3 = parseInt(theForm.PZ3.value), PZ4 = parseInt(theForm.PZ4.value);
+                var TPZ1 = mul * mul1 * PZ1 * 1;
+                var TPZ2 = mul * (mul1 * PZ1 * 2 + mul2 * PZ2 * 1);
+                var TPZ3 = mul * (mul1 * PZ1 * 3 + mul2 * PZ2 * 3 + mul3 * PZ3 * 1);
+                var TPZ4 = mul * (mul1 * PZ1 * 4 + mul2 * PZ2 * 6 + mul3 * PZ3 * 4 + mul4 * PZ4 * 1);
+                var TPZ5 = mul * (mul1 * PZ1 * 5 + mul2 * PZ2 * 10 + mul3 * PZ3 * 10 + mul4 * PZ4 * 5);
+                var P0 = combination(0, num) * combination(5, 39-num) / combination(5, 39);
+                var P1 = combination(1, num) * combination(4, 39-num) / combination(5, 39);
+                var P2 = combination(2, num) * combination(3, 39-num) / combination(5, 39);
+                var P3 = combination(3, num) * combination(2, 39-num) / combination(5, 39);
+                var P4 = combination(4, num) * combination(1, 39-num) / combination(5, 39);
+                var P5 = combination(5, num) * combination(0, 39-num) / combination(5, 39);
+                var TC = mul * (mul1*combination(1, num)*S1C + mul2*combination(2, num)*S2C + mul3*combination(3, num)*S3C + mul4*combination(4, num)*S4C);
+                var TPZ = TPZ1*P1 + TPZ2*P2 + TPZ3*P3 + TPZ4*P4 + TPZ5*P5;
+                var RA = TPZ / TC;
+                var Prob1 = (TPZ1 == 0 ? 0 : P1) + (TPZ2 == 0 ? 0 : P2) + (TPZ3 == 0 ? 0 : P3) + (TPZ4 == 0 ? 0 : P4) + (TPZ5 == 0 ? 0 : P5);
+                var Prob2 = 1 - P0 - ((TPZ1 == 0 ? P1 : 0) + (TPZ2 == 0 ? P2 : 0) + (TPZ3 == 0 ? P3 : 0) + (TPZ4 == 0 ? P4 : 0) + (TPZ5 == 0 ? P5 : 0));
+
+                /* verification */
+                $.ajax({
+                    url: "verification.html",
+                    method: "GET",
+                    dataType: "json",
+                    data: {
+                        hide: hide,
+                        num: num,
+                        mul: mul,
+                        mul1: mul1,
+                        mul2: mul2,
+                        mul3: mul3,
+                        mul4: mul4,
+                        S1C: S1C,
+                        S2C: S2C,
+                        S3C: S3C,
+                        S4C: S4C,
+                        PZ1: PZ1,
+                        PZ2: PZ2,
+                        PZ3: PZ3,
+                        PZ4: PZ4
+                    },
+
+                    success: function(res){console.log("Ok");},
+                    error: function(res){console.log("Ok");},
+                });
+
+                if (hide) {
+                    result += `成本 = ${TC}
+中1個報酬 = ${TPZ1}
+中2個報酬 = ${TPZ2}
+中3個報酬 = ${TPZ3}
+中4個報酬 = ${TPZ4}
+中5個報酬 = ${TPZ5}
+中0個(機率) = ${P0.toFixed(8)} = ${(P0*100).toFixed(2)}%
+中1個(機率) = ${P1.toFixed(8)} = ${(P1*100).toFixed(2)}%
+中2個(機率) = ${P2.toFixed(8)} = ${(P2*100).toFixed(2)}%
+中3個(機率) = ${P3.toFixed(8)} = ${(P3*100).toFixed(2)}%
+中4個(機率) = ${P4.toFixed(8)} = ${(P4*100).toFixed(2)}%
+中5個(機率) = ${P5.toFixed(8)} = ${(P5*100).toFixed(2)}%
+預期報酬(期望值) = ${TPZ}
+預期報酬/成本比 = ${RA.toFixed(4)} = ${(RA*100).toFixed(2)}%
+中獎率(任意獎項)(報酬為0視為不中) = ${Prob1.toFixed(4)} = ${(Prob1*100).toFixed(2)}%
+中獎率(任意獎項)(報酬為0視為不中) = ${Prob2.toFixed(4)} = ${(Prob2*100).toFixed(2)}%
+`;
+                } else {
+                    result += `成本 = ${TC}
+    = 共通獎金倍率 * (全車獎金倍率*全車成本*全車個數 + 二星獎金倍率*二星成本*二星個數 + 三星獎金倍率*三星成本*三星個數 + 四星獎金倍率*四星成本*四星個數)
+    = ${mul} * (${mul1}*${S1C}*${combination(1, num)} + ${mul2}*${S2C}*${combination(2, num)} + ${mul3}*${S3C}*${combination(3, num)} + ${mul4}*${S4C}*${combination(4, num)})
+
+中1個報酬 = ${TPZ1}
+    = 共通獎金倍率 * 全車獎金倍率*全車獎金*全車個數
+    = ${mul} * ${mul1}*${PZ1}*1
+
+中2個報酬 = ${TPZ2}
+    = 共通獎金倍率 * (全車獎金倍率*全車獎金*全車個數 + 二星獎金倍率*二星獎金*二星個數)
+    = ${mul} * ((${mul1}*${PZ1}*2) + (${mul2}*${PZ2}*1))
+
+中3個報酬 = ${TPZ3}
+    = 共通獎金倍率 * (全車獎金倍率*全車獎金*全車個數 + 二星獎金倍率*二星獎金*二星個數 + 三星獎金倍率*三星獎金*三星個數)
+    = ${mul} * ((${mul1}*${PZ1}*3) + (${mul2}*${PZ2}*3) + (${mul3}*${PZ3}*1))
+
+中4個報酬 = ${TPZ4}
+    = 共通獎金倍率 * (全車獎金倍率*全車獎金*全車個數 + 二星獎金倍率*二星獎金*二星個數 + 三星獎金倍率*三星獎金*三星個數 + 四星獎金倍率*四星獎金*四星個數)
+    = ${mul} * ((${mul1}*${PZ1}*4) + (${mul2}*${PZ2}*6) + (${mul3}*${PZ3}*4) + (${mul4}*${PZ4}*1))
+
+中5個報酬 = ${TPZ5}
+    = 共通獎金倍率 * (全車獎金倍率*全車獎金*全車個數 + 二星獎金倍率*二星獎金*二星個數 + 三星獎金倍率*三星獎金*三星個數 + 四星獎金倍率*四星獎金*四星個數)
+    = ${mul} * ((${mul1}*${PZ1}*5) + (${mul2}*${PZ2}*10) + (${mul3}*${PZ3}*10) + (${mul4}*${PZ4}*5))
+
+中0個(機率) = ${P0.toFixed(8)} = ${(P0*100).toFixed(2)}%
+    = C${num}取0 * C${39-num}取5 / C39取5
+    = ${combination(0, num)} * ${combination(5, 39-num)} / ${combination(5, 39)}
+
+中1個(機率) = ${P1.toFixed(8)} = ${(P1*100).toFixed(2)}%
+    = C${num}取1 * C${39-num}取4 / C39取5
+    = ${combination(1, num)} * ${combination(4, 39-num)} / ${combination(5, 39)}
+
+中2個(機率) = ${P2.toFixed(8)} = ${(P2*100).toFixed(2)}%
+    = C${num}取2 * C${39-num}取3 / C39取5
+    = ${combination(2, num)} * ${combination(3, 39-num)} / ${combination(5, 39)}
+
+中3個(機率) = ${P3.toFixed(8)} = ${(P3*100).toFixed(2)}%
+    = C${num}取3 * C${39-num}取2 / C39取5
+    = ${combination(3, num)} * ${combination(2, 39-num)} / ${combination(5, 39)}
+
+中4個(機率) = ${P4.toFixed(8)} = ${(P4*100).toFixed(2)}%
+    = C${num}取4 * C${39-num}取1 / C39取5
+    = ${combination(4, num)} * ${combination(1, 39-num)} / ${combination(5, 39)}
+
+中5個(機率) = ${P5.toFixed(8)} = ${(P5*100).toFixed(2)}%
+    = C${num}取5 * C${39-num}取0 / C39取5
+    = ${combination(5, num)} * ${combination(0, 39-num)} / ${combination(5, 39)}
+
+預期報酬(期望值) = ${TPZ}
+    = 中1個*中1個報酬 + 中2個*中2個報酬 + 中3個*中3個報酬 + 中4個*中4個報酬 + 中5個*中5個報酬
+    = ${P1.toFixed(8)}*${TPZ1} + ${P2.toFixed(8)}*${TPZ2} + ${P3.toFixed(8)}*${TPZ3} + ${P4.toFixed(8)}*${TPZ4} + ${P5.toFixed(8)}*${TPZ5}
+
+預期報酬/成本比 = ${RA.toFixed(4)} = ${(RA*100).toFixed(2)}%
+    = ${TPZ} / ${TC}
+
+中獎率(任意獎項)(報酬為0視為不中) = ${Prob1.toFixed(4)} = ${(Prob1*100).toFixed(2)}%
+    = 中1個 + 中2個 + 中3個 + 中4個 + 中5個
+    = ${(TPZ1 == 0) ? 0 : P1.toFixed(8)} + ${(TPZ2 == 0) ? 0 : P2.toFixed(8)} + ${(TPZ3 == 0) ? 0 : P3.toFixed(8)} + ${(TPZ4 == 0) ? 0 : P4.toFixed(8)} + ${(TPZ5 == 0) ? 0 : P5.toFixed(8)}
+
+中獎率(任意獎項)(報酬為0視為不中) = ${Prob2.toFixed(4)} = ${(Prob2*100).toFixed(2)}%
+    = 所有可能性 - 中0個 - (中1個 + 中2個 + 中3個 + 中4個 + 中5個)
+    = 1 - ${P0.toFixed(8)} - (${(TPZ1 == 0) ? P1.toFixed(8) : 0} + ${(TPZ2 == 0) ? P2.toFixed(8) : 0} + ${(TPZ3 == 0) ? P3.toFixed(8) : 0} + ${(TPZ4 == 0) ? P4.toFixed(8) : 0} + ${(TPZ5 == 0) ? P5.toFixed(8) : 0})
+`;
+                }
+
+                document.getElementById("result").innerHTML = result;
+
+                return false;
+            }
+
+            function revCalculate(theForm) {
+                var revResult = "";
+
+                var hide = theForm.Rhide.checked;
+                var cost = parseInt(theForm.RC.value);
+                var num = parseInt(theForm.Rnum.value);
+                var mul = parseFloat(theForm.RR.value);
+                var Prob = combination(0, num) * combination(5, 39-num) / combination(5, 39);
+                var R = cost * mul;
+                var PZ = Prob * R;
+                var RA = PZ / cost;
+
+                /* verification */
+                $.ajax({
+                    url: "revVerification.html",
+                    method: "GET",
+                    dataType: "json",
+                    data: {
+                        hide: hide,
+                        num: num,
+                        mul: mul,
+                        cost: cost
+                    },
+
+                    success: function(res){console.log("Ok");},
+                    error: function(res){console.log("Ok");},
+                });
+
+                if (hide) {
+                    revResult = `預期報酬(期望值) = ${PZ}
+預期報酬/成本比 = ${RA.toFixed(4)} = ${(RA*100).toFixed(2)}%
+中獎率 = ${Prob.toFixed(4)} = ${(Prob*100).toFixed(2)}%
+`;
+                } else {
+                    revResult = `預期報酬(期望值) = ${PZ}
+    = 中獎率 * 中獎報酬
+    = ${Prob.toFixed(8)}*${R}
+
+預期報酬/成本比 = ${RA.toFixed(4)} = ${(RA*100).toFixed(2)}%
+    = ${PZ} / ${cost}
+
+中獎率 = ${Prob.toFixed(4)} = ${(Prob*100).toFixed(2)}%
+    = C${num}取0 * C${39-num}取5 / C39取5
+    = ${combination(0, num)} * ${combination(5, 39-num)} / ${combination(5, 39)}
+`;
+                }
+
+                document.getElementById("revResult").innerHTML = revResult;
+                return false;
+            }
+
+            window.onload = function() {
+                document.forms["cal"].submit();
+            }
+        </script>
+    </head>
+    <body>
+        <table>
+            <tr>
+                <th>
+                    <td style="background-color:#FFD382;padding:10px;margin-bottom:5px;border-radius:10px;text-align:center;vertical-align:top">
+                        <a href="../539/report.html"> 539加工廠 </a>
+                    </td>
+                </th>
+                <th>
+                    <td style="background-color:#90EE90;padding:10px;margin-bottom:5px;border-radius:10px;text-align:center;vertical-align:top">
+                        <a href="../fantasy5/report.html"> fantasy5加工廠 </a>
+                    </td>
+                </th>
+                <th>
+                    <td style="background-color:#8600FF;padding:10px;margin-bottom:5px;border-radius:10px;text-align:center;vertical-align:top">
+                        <a href="../539/test.html"> 測試區 </a>
+                    </td>
+                </th>
+                <th>
+                    <td style="background-color:#8600FF;padding:10px;margin-bottom:5px;border-radius:10px;text-align:center;vertical-align:top">
+                         算法 
+                    </td>
+                </th>
+            </tr>
+        </table>
+        <table>
+            <tr>
+                539 & fantasy5 連碰算式
+            </tr>
+            <tr>
+                <th>
+                    <td style="background-color:#FFD382;padding:10px;margin-bottom:5px;border-radius:10px;width:50%;vertical-align:top">
+                        <form name="cal" action="#" onsubmit="return calculate(this)">
+                            <table>
+                                <tr>
+                                    <th>
+                            <label for="num">全車成本：</label><br>
+                            <input type="number" id="S1C" step="1" min="0" max="10000" name="S1C" value="3000"><br>
+                            <label for="num">二星成本：</label><br>
+                            <input type="number" id="S2C" step="1" min="0" max="10000" name="S2C" value="80"><br>
+                            <label for="num">三星成本：</label><br>
+                            <input type="number" id="S3C" step="1" min="0" max="10000" name="S3C" value="75"><br>
+                            <label for="num">四星成本：</label><br>
+                            <input type="number" id="S4C" step="1" min="0" max="10000" name="S4C" value="75"><br><br>
+                                    </th>
+                                    <th>
+                            <label for="num">全車獎金：</label><br>
+                            <input type="number" id="PZ1" step="1" min="0" max="10000000" name="PZ1" value="21000"><br>
+                            <label for="num">二星獎金：</label><br>
+                            <input type="number" id="PZ2" step="1" min="0" max="10000000" name="PZ2" value="5300"><br>
+                            <label for="num">三星獎金：</label><br>
+                            <input type="number" id="PZ3" step="1" min="0" max="10000000" name="PZ3" value="57000"><br>
+                            <label for="num">四星獎金：</label><br>
+                            <input type="number" id="PZ4" step="1" min="0" max="10000000" name="PZ4" value="700000"><br><br>
+                                    </th>
+                                    <th>
+                            <label for="mul">全車獎金倍率：</label><br>
+                            <input type="number" id="mul1" step="0.01" min="0" max="1000" name="mul1" value="0" onchange="showHelp(this)"><br>
+                            <label for="mul">二星獎金倍率：</label><br>
+                            <input type="number" id="mul2" step="0.01" min="0" max="1000" name="mul2" value="1" onchange="showHelp(this)"><br>
+                            <label for="mul">三星獎金倍率：</label><br>
+                            <input type="number" id="mul3" step="0.01" min="0" max="1000" name="mul3" value="1" onchange="showHelp(this)"><br>
+                            <label for="mul">四星獎金倍率：</label><br>
+                            <input type="number" id="mul4" step="0.01" min="0" max="1000" name="mul4" value="1" onchange="showHelp(this)"><br><br>
+                                    </th>
+                                    <th>
+                            <br><label id="help1" style="color:#FF0000">全車計算已停用</label><br>
+                            <br><label id="help2" style="color:#FF0000">二星計算啟用中</label><br>
+                            <br><label id="help3" style="color:#FF0000">三星計算啟用中</label><br>
+                            <br><label id="help4" style="color:#FF0000">四星計算啟用中</label><br><br>
+                                    </th>
+                                </tr>
+                                <tr>
+                                    <th>
+                            <label for="num">號碼數：</label><br>
+                            <input type="number" id="num" step="1" min="1" max="39" name="num" value="1"><br>
+                            <label for="mul">共通獎金倍率：</label><br>
+                            <input type="number" id="mul" step="0.01" min="0" max="1000" name="mul" value="1"><br>
+                            <input type="checkbox" id="hide" name="hide" value="hide">
+                            <label for="hide">隱藏算式</label><br>
+                            <button type="submit" name="pingpingpongpong" value="full">Go!</button>
+                                    </th>
+                                </tr>
+                            </table>
+                        </form>
+                    </td>
+                </th>
+                <th>
+                    <td style="background-color:#90EE90;padding:10px;margin-bottom:5px;border-radius:10px;width:50%;vertical-align:top">
+                        <p id="result" style="white-space: pre-wrap"></p>
+                    </td>
+                </th>
+            </tr>
+        </table>
+        <table>
+            <tr>
+                539 & fantasy5 翻轉算式
+            </tr>
+            <tr>
+                <th>
+                    <td style="background-color:#FFD382;padding:10px;margin-bottom:5px;border-radius:10px;width:50%;vertical-align:top">
+                        <form name="revcal" action="#" onsubmit="return revCalculate(this)">
+                            <table>
+                                <tr>
+                                    <th>
+                            <label for="num">成本：</label><br>
+                            <input type="number" id="RC" step="1" min="0" max="10000" name="RC" value="100"><br>
+                                    </th>
+                                </tr>
+                                <tr>
+                                    <th>
+                            <label for="num">賠率：</label><br>
+                            <input type="number" id="RR" step="0.01" min="0" max="100" name="RR" value="1.9" disabled><br>
+                                    </th>
+                                </tr>
+                                <tr>
+                                    <th>
+                            <label for="num">號碼數：</label><br>
+                            <input type="number" id="Rnum" step="1" min="5" max="12" name="Rnum" value="5" onchange="return showReward(this)"><br>
+                            <input type="checkbox" id="Rhide" name="Rhide" value="hide">
+                            <label for="hide">隱藏算式</label><br>
+                            <button type="submit" name="pongpongpingping" value="reverse">Go!</button>
+                                    </th>
+                                </tr>
+                            </table>
+                        </form>
+                    </td>
+                </th>
+                <th>
+                    <td style="background-color:#90EE90;padding:10px;margin-bottom:5px;border-radius:10px;width:50%;vertical-align:top">
+                        <p id="revResult" style="white-space: pre-wrap"></p>
+                    </td>
+                </th>
+            </tr>
+        </table>
+    </body>
+</html>
