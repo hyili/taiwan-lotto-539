@@ -32,7 +32,7 @@
         </table>
         <table width=100%>
             <tr>
-                539 - 選擇日期區間(最長一年)
+                539 - 選擇日期區間(最長三年)
             </tr>
             <tr>
                 <td style="background-color:#FFD382;padding:10px;margin-bottom:5px;border-radius:10px;width:50%;vertical-align:top">
@@ -79,28 +79,43 @@
 
         <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js"></script>
         <script>
+            var prevChart;
             var records = {
                 "text-up": {
                     "init": false,
-                    "data": Array(39),
+                    "phaseNum": 0,
+                    "data": new Array(39),
+                    "data2": new Array(39*39),
+                    "data3": new Array(39*39*39),
+                    "data4": new Array(39*39*39*39),
                     "color": "rgb(255, 99, 132)",
-                    "tcolor": "rgba(255, 99, 132, 0.2)"
+                    "tcolor": "rgba(255, 99, 132, 0.2)",
+                    "start": new Date(2020, 0, 1),
+                    "end": new Date(2020, 11, 31)
                 },
                 "text-down": {
                     "init": false,
-                    "data": Array(39),
+                    "phaseNum": 0,
+                    "data": new Array(39),
+                    "data2": new Array(39*39),
+                    "data3": new Array(39*39*39),
+                    "data4": new Array(39*39*39*39),
                     "color": "rgb(54, 162, 235)",
-                    "tcolor": "rgba(54, 162, 235, 0.2)"
+                    "tcolor": "rgba(54, 162, 235, 0.2)",
+                    "start": new Date(2020, 0, 1),
+                    "end": new Date(2020, 11, 31)
                 }
             };
+            statistics("text-up", records);
+            statistics("text-down", records);
 
             $("#slider-up").dateRangeSlider({
                 range: {
                     min: false,
-                    max: {days: 365}
+                    max: {days: 1095}
                 },
                 bounds: {
-                    min: new Date(2020, 0, 1),
+                    min: new Date(2018, 0, 1),
                     max: new Date()
                 },
                 defaultValues: {
@@ -115,10 +130,10 @@
             $("#slider-down").dateRangeSlider({
                 range: {
                     min: false,
-                    max: {days: 365}
+                    max: {days: 1095}
                 },
                 bounds: {
-                    min: new Date(2020, 0, 1),
+                    min: new Date(2018, 0, 1),
                     max: new Date()
                 },
                 defaultValues: {
@@ -149,12 +164,26 @@
                 var ed = new Date(records[id]["end"]);
 
                 records[id]["data"].fill(0);
-                $.getJSON("data_json/2020-01-01_2022-01-01.json", function(data) {
+                records[id]["data2"].fill(0);
+                records[id]["data3"].fill(0);
+                records[id]["data4"].fill(0);
+                records[id]["phaseNum"] = 0;
+                $.getJSON("data_json/2008-01-01_2022-01-01.json", function(data) {
                     for (key in data) {
                         var td = new Date(key);
                         if (td < sd || ed < td) continue;
+                        records[id]["phaseNum"] += 1;
                         for (i = 0; i < 5; i++) {
-                            records[id]["data"][parseInt(data[key][i])-1] += 1;
+                            records[id]["data"][(parseInt(data[key][i])-1)] += 1;
+                            for (j = i+1; j < 5; j++) {
+                                records[id]["data2"][(parseInt(data[key][i])-1)+(parseInt(data[key][j])-1)*39] += 1;
+                                for (k = j+1; k < 5; k++) {
+                                    records[id]["data3"][(parseInt(data[key][i])-1)+(parseInt(data[key][j])-1)*39+(parseInt(data[key][k])-1)*39*39] += 1;
+                                    for (l = k+1; l < 5; l++) {
+                                        records[id]["data4"][(parseInt(data[key][i])-1)+(parseInt(data[key][j])-1)*39+(parseInt(data[key][k])-1)*39*39+(parseInt(data[key][l])-1)*39*39*39] += 1;
+                                    }
+                                }
+                            }
                         }
                     }
 
@@ -182,8 +211,12 @@
             }
 
             function genText(records) {
+                var showTop = 10;
                 for (id in records) {
                     if (!records[id]["init"]) continue;
+
+                    plain = document.getElementById(id);
+                    plain.innerHTML = "期間共開出了" + records[id]["phaseNum"].toString() + "期\n";
 
                     var data = records[id]["data"];
                     AoB = data.map(function (v, k) {
@@ -195,19 +228,93 @@
                         return 0;
                     })
 
-                    plain = document.getElementById(id);
-                    plain.innerHTML = "";
+                    plain.innerHTML += "全車排名\n";
+                    for (i = 0; i < showTop; i++) {
+                        plain.innerHTML += (AoB[i].key+1).toString().padStart(3, " ")
+                            + " 出現 ".padStart(21, " ")
+                            + (AoB[i].val).toString().padStart(3, " ")
+                            + " 次\n";
+                    }
 
-                    for (i = 0; i < 39; i++) {
-                        plain.innerHTML += (AoB[i].key+1).toString().padStart(3, " ") + " 出現 " + (AoB[i].val).toString().padStart(3, " ") + " 次\n";
+
+                    var data2 = records[id]["data2"];
+                    AoB2 = data2.map(function (v, k) {
+                        return {key: k, val: v};
+                    });
+                    AoB2.sort(function (a, b) {
+                        if (a.val < b.val) return 1;
+                        if (a.val > b.val) return -1;
+                        return 0;
+                    })
+
+                    plain.innerHTML += "二星排名\n";
+                    for (i = 0; i < showTop; i++) {
+                        plain.innerHTML += (AoB2[i].key%39+1).toString().padStart(3, " ")
+                            + ", "
+                            + (Math.floor(AoB2[i].key/39)%39+1).toString().padStart(3, " ")
+                            + " 出現 ".padStart(16, " ")
+                            + (AoB2[i].val).toString().padStart(3, " ")
+                            + " 次\n";
+                    }
+
+
+                    var data3 = records[id]["data3"];
+                    AoB3 = data3.map(function (v, k) {
+                        return {key: k, val: v};
+                    });
+                    AoB3.sort(function (a, b) {
+                        if (a.val < b.val) return 1;
+                        if (a.val > b.val) return -1;
+                        return 0;
+                    })
+
+                    plain.innerHTML += "三星排名\n";
+                    for (i = 0; i < showTop; i++) {
+                        plain.innerHTML += (AoB3[i].key%39+1).toString().padStart(3, " ")
+                            + ", "
+                            + (Math.floor(AoB3[i].key/39)%39+1).toString().padStart(3, " ")
+                            + ", "
+                            + (Math.floor(Math.floor(AoB3[i].key/39)/39)%39+1).toString().padStart(3, " ")
+                            + " 出現 ".padStart(11, " ")
+                            + (AoB3[i].val).toString().padStart(3, " ")
+                            + " 次\n";
+                    }
+
+
+                    var data4 = records[id]["data4"];
+                    AoB4 = data4.map(function (v, k) {
+                        return {key: k, val: v};
+                    });
+                    AoB4.sort(function (a, b) {
+                        if (a.val < b.val) return 1;
+                        if (a.val > b.val) return -1;
+                        return 0;
+                    })
+
+                    plain.innerHTML += "四星排名\n";
+                    for (i = 0; i < showTop; i++) {
+                        plain.innerHTML += (AoB4[i].key%39+1).toString().padStart(3, " ")
+                            + ", "
+                            + (Math.floor(AoB4[i].key/39)%39+1).toString().padStart(3, " ")
+                            + ", "
+                            + (Math.floor(Math.floor(AoB4[i].key/39)/39)%39+1).toString().padStart(3, " ")
+                            + ", "
+                            + (Math.floor(Math.floor(Math.floor(AoB4[i].key/39)/39)/39)%39+1).toString().padStart(3, " ")
+                            + " 出現 ".padStart(6, " ")
+                            + (AoB4[i].val).toString().padStart(3, " ")
+                            + " 次\n";
                     }
                 }
             }
 
             function genChart(records) {
                 var data = Array();
+
                 for (id in records) {
-                    if (!records[id]["init"]) continue;
+                    if (!records[id]["init"]) {
+                        return;
+                        continue;
+                    }
                     data.push({
                         backgroundColor: records[id]["tcolor"],
                         borderColor: records[id]["color"],
@@ -222,27 +329,51 @@
                 }
 
                 var ctx = document.getElementById('mychart');
-                var myRadarChart = new Chart(ctx, {
-                    type: 'radar',
-                    data: {
-                        labels: Array.from(Array(39), (e, i) => (i + 1).toString()),
-                        datasets: data
-                    },
-                    options: {
-                        maintainAspectRatio: false,
-                        elements: {
-                            line: {
-                                tension: 0,
-                                borderWidth: 3
-                            }
+                if (typeof(prevChart) == 'undefined') {
+                    prevChart = new Chart(ctx, {
+                        type: 'radar',
+                        data: {
+                            labels: Array.from(Array(39), (e, i) => (i + 1).toString()),
+                            datasets: data
                         },
-                        scale: {
-                            ticks: {
-                                beginAtZero: true
+                        options: {
+                            maintainAspectRatio: false,
+                            elements: {
+                                line: {
+                                    tension: 0,
+                                    borderWidth: 3
+                                }
+                            },
+                            scale: {
+                                ticks: {
+                                    beginAtZero: true
+                                }
                             }
                         }
-                    }
-                });
+                    });
+                } else {
+                    prevChart.update({
+                        type: 'radar',
+                        data: {
+                            labels: Array.from(Array(39), (e, i) => (i + 1).toString()),
+                            datasets: data
+                        },
+                        options: {
+                            maintainAspectRatio: false,
+                            elements: {
+                                line: {
+                                    tension: 0,
+                                    borderWidth: 3
+                                }
+                            },
+                            scale: {
+                                ticks: {
+                                    beginAtZero: true
+                                }
+                            }
+                        }
+                    })
+                }
             }
         </script>
     </body>

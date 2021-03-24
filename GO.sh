@@ -165,5 +165,5 @@ echo '</body>' >> $webpage
 mv img/* /usr/local/www/nginx/539/img/
 
 
-./transform_json.py 2020-01-01 2022-01-01
+./transform_json.py 2008-01-01 2022-01-01
 mv data_json/* /usr/local/www/nginx/539/data_json/
